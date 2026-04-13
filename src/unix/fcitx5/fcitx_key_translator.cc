@@ -32,6 +32,7 @@
 
 #include <fcitx-utils/key.h>
 #include <fcitx-utils/keysym.h>
+#include <fcitx-utils/utf8.h>
 
 #include <cstdint>
 #include <map>
@@ -320,7 +321,28 @@ bool KeyTranslator::Translate(KeySym keyval, uint32_t keycode,
   if (modifiers & KeyState::Super) {
     return false;
   }
+  // --- 新增：支持前端（如 Flick 键盘）直接传递的 Unicode 字符 ---
+  // Fcitx5 的 Unicode KeySym 带有 0x01000000 偏移量
+  if (keyval >= 0x01000000 && keyval <= 0x0110FFFF) {
+    uint32_t uni = keyval & 0x00FFFFFF;
 
+    // 检查是否属于日语相关 Unicode 范围：
+    // 3000-303F: 日语标点/符号 (如 、 。 「 」)
+    // 3040-309F: 平假名
+    // 30A0-30FF: 片假名
+    // FF00-FFEF: 全角符号/字母
+    if ((uni >= 0x3000 && uni <= 0x30FF) || (uni >= 0xFF00 && uni <= 0xFFEF)) {
+      std::string utf8_string = fcitx::utf8::UCS4ToUTF8(uni);
+
+      if (!utf8_string.empty()) {
+        out_event->set_key_string(utf8_string);
+        // 设置 key_code 为 0 避免 Mozc 尝试二次转换
+        out_event->set_key_code(0);
+        return true;
+      }
+    }
+  }
+  
   // Due to historical reasons, many linux ditributions set Hiragana_Katakana
   // key as Hiragana key (which is Katkana key with shift modifier). So, we
   // translate Hiragana_Katanaka key as Hiragana key by mapping table, and
