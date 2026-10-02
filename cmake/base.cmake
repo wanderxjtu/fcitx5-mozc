@@ -83,6 +83,7 @@ set(MOZC_BASE_SRCS
     strings/japanese.cc
     strings/unicode.cc
     system_util.cc
+    android_util.cc
     text_normalizer.cc
     unverified_aes256.cc
     unverified_sha1.cc

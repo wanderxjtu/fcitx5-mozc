@@ -19,7 +19,8 @@ if (NOT DEFINED MOZC_TARGET)
     set(protobuf_INSTALL OFF)
     set(protobuf_BUILD_TESTS OFF)
     set(protobuf_BUILD_LIBUPB OFF) # No binary for iOS.
-    add_subdirectory("protobuf")
+    add_subdirectory(protobuf)
+
     install(TARGETS utf8_validity DESTINATION "${CMAKE_INSTALL_LIBDIR}")
     install(TARGETS libprotobuf DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 
